@@ -18,6 +18,7 @@ class TransactionController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
         $request->validate([
             'nama_pelanggan' => 'nullable|string|max:255',
             'loyalty_id' => 'nullable|string',
@@ -176,7 +177,7 @@ class TransactionController extends Controller
     public function dashboard(Request $request): JsonResponse
     {
         $kasir = $request->user();
-        $adminId = $kasir->admin_id;
+        $adminId = $kasir->admin_id ?? $kasir->id;
 
         $today = today();
 

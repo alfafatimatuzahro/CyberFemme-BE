@@ -92,6 +92,7 @@ class TransactionController extends Controller
         $request->validate([
             'action' => 'required|in:setujui,tolak',
             'catatan' => 'nullable|string',
+            'metode_bayar' => 'required|in:cash,qris',
         ]);
 
         $newStatus = $request->action === 'setujui' ? 'sukses' : 'ditolak';
@@ -124,4 +125,31 @@ class TransactionController extends Controller
             'transaction' => $transaction->fresh(),
         ]);
     }
+
+    public function dashboard(Request $request)
+{
+    $kasir = $request->user();
+
+    $today = today();
+
+    $totalTransaksi = Transaction::where(
+        'kasir_id',
+        $kasir->id
+    )
+    ->whereDate('created_at', $today)
+    ->count();
+
+    $totalOmzet = Transaction::where(
+        'kasir_id',
+        $kasir->id
+    )
+    ->where('status', 'sukses')
+    ->whereDate('created_at', $today)
+    ->sum('total');
+
+    return response()->json([
+        'total_transaksi' => $totalTransaksi,
+        'total_omzet' => $totalOmzet
+    ]);
+}
 }

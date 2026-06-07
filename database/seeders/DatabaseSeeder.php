@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\FraudRule;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Transaction;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -90,6 +91,54 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $p) {
             Product::create(array_merge($p, ['admin_id' => $admin->id]));
         }
+        // === TRANSAKSI DUMMY ===
+
+Transaction::create([
+    'invoice_id' => 'INV001',
+    'kasir_id' => $kasirAnnisa->id,
+    'admin_id' => $admin->id,
+    'nama_pelanggan' => 'Budi',
+    'metode_bayar' => 'cash',
+    'subtotal' => 100000,
+    'ppn' => 11000,
+    'diskon' => 0,
+    'total' => 111000,
+    'nominal_bayar' => 120000,
+    'kembalian' => 9000,
+    'status' => 'sukses',
+]);
+
+Transaction::create([
+    'invoice_id' => 'INV002',
+    'kasir_id' => $kasirAnnisa->id,
+    'admin_id' => $admin->id,
+    'nama_pelanggan' => 'Andi',
+    'metode_bayar' => 'qris',
+    'subtotal' => 250000,
+    'ppn' => 27500,
+    'diskon' => 0,
+    'total' => 277500,
+    'nominal_bayar' => 277500,
+    'kembalian' => 0,
+    'status' => 'sukses',
+]);
+
+Transaction::create([
+    'invoice_id' => 'INV003',
+    'kasir_id' => $kasirCitra->id,
+    'admin_id' => $admin->id,
+    'nama_pelanggan' => 'Siti',
+    'metode_bayar' => 'cash',
+    'subtotal' => 5000000,
+    'ppn' => 550000,
+    'diskon' => 0,
+    'total' => 5550000,
+    'nominal_bayar' => 5550000,
+    'kembalian' => 0,
+    'status' => 'mencurigakan',
+    'fraud_reason' => 'Nominal transaksi terlalu besar'
+]);
+
 
         $this->command->info('✅ Seeder selesai! Data berhasil dibuat.');
         $this->command->info('');

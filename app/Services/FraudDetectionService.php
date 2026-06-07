@@ -47,15 +47,38 @@ class FraudDetectionService
             }
         }
 
-        // Rule 2: Cek qty per item
-        if ($this->rule->batas_qty_aktif) {
-            foreach ($items as $item) {
-                if ($item['qty'] > $this->rule->batas_qty_max) {
-                    $fraudReasons[] = "Jumlah item \"{$item['nama_produk']}\" melebihi batas maksimal ({$this->rule->batas_qty_max} pcs)";
-                    break;
-                }
-            }
+        // Rule 2A: qty per item
+
+if ($this->rule->batas_qty_aktif) {
+
+    foreach ($items as $item) {
+
+        if ($item['qty'] > $this->rule->batas_qty_max) {
+
+            $fraudReasons[] =
+            "Jumlah item {$item['nama_produk']} melebihi batas";
+
+            break;
         }
+    }
+}
+
+// Rule 2B: total qty transaksi
+
+if ($this->rule->batas_qty_aktif) {
+
+    $totalQty = 0;
+
+    foreach ($items as $item) {
+        $totalQty += $item['qty'];
+    }
+
+    if ($totalQty > $this->rule->batas_qty_max) {
+
+        $fraudReasons[] =
+        "Total barang transaksi melebihi {$this->rule->batas_qty_max} pcs";
+    }
+}
 
         // Rule 3: Anti-spam / duplikasi transaksi
         if ($this->rule->anti_spam_aktif) {
@@ -70,6 +93,9 @@ class FraudDetectionService
                 $fraudReasons[] = "Duplikasi transaksi terdeteksi dalam {$this->rule->rentang_duplikasi_menit} menit terakhir";
             }
         }
+        \Log::info([
+            'fraud_reasons' => $fraudReasons
+        ]);
 
         if (!empty($fraudReasons)) {
             return [
@@ -124,7 +150,7 @@ class FraudDetectionService
             $notif = SecurityNotification::createFraudAlert($this->adminId, $transaction);
 
             // Broadcast real-time event
-            event(new \App\Events\FraudDetected($transaction, $notif));
+        event(new \App\Events\FraudDetected($transaction, $notif));
         } elseif ($transaction->status === 'tertahan') {
             SecurityNotification::create([
                 'admin_id' => $this->adminId,
@@ -135,7 +161,7 @@ class FraudDetectionService
                 'ref_id' => $transaction->id,
             ]);
 
-            event(new \App\Events\TransactionHeld($transaction));
+        event(new \App\Events\TransactionHeld($transaction));
         }
     }
 
